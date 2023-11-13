@@ -1,24 +1,34 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { getOrders } from "../../apiCalls";
+import { getOrders, postOrder } from "../../apiCalls";
 import Orders from "../../components/Orders/Orders";
 import OrderForm from "../../components/OrderForm/OrderForm";
 
 function App() {
+  const [orders, setOrders] = useState([]);
+  const [error, setError] = useState(""); 
 
-const [orders, setOrders] = useState([]) //orders is an array
+  const addOrder = (newOrder) => {
+
+    postOrder(newOrder)
+      .then((data) => setOrders([...orders, newOrder]))
+      .catch((error) => setError(error.message));
+  };
 
   useEffect(() => {
-    getOrders().catch((err) => console.error("Error fetching:", err));
-  });
+    getOrders()
+      .then((data) => {
+        setOrders(data.orders);    
+      })
+      .catch((error) => console.log(error.message));
+  }, []);
 
   return (
-    <main className="App">
+    <main className='App'>
       <header>
         <h1>Burrito Builder</h1>
-        <OrderForm />
+        <OrderForm addOrder={addOrder} />
       </header>
-
       <Orders orders={orders} />
     </main>
   );
